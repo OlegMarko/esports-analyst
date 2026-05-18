@@ -3,13 +3,38 @@
 namespace App\Services;
 
 use App\Models\Player;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 
 class LeaderboardService
 {
-    // Step 6 will implement leaderboard persistence.
+    private string $prefix = 'cs2_lb';
 
-    public function record(Player $player): void
+    private int $ttl = 3600;
+
+    public function record(Player $player, string $game, string $metric, float $value): void
     {
-        // Placeholder — will write kda, frags (kills), adr, clutches_won to leaderboard store.
+        $key = "{$this->prefix}:{$game}:{$metric}";
+
+        Redis::zadd($key, $value, $player->faceit_player_id);
+        Redis::expire($key, $this->ttl);
+    }
+
+    public function top(string $game, string $metric, int $limit = 10): array
+    {
+        $key = "{$this->prefix}:{$game}:{$metric}";
+
+        return Cache::remember(
+            "lb_top:{$game}:{$metric}:{$limit}",
+            300,
+            fn () => Redis::zrevrange($key, 0, $limit - 1, 'WITHSCORES'),
+        );
+    }
+
+    public function playerRank(string $faceitPlayerId, string $game, string $metric): ?int
+    {
+        $rank = Redis::zrevrank("{$this->prefix}:{$game}:{$metric}", $faceitPlayerId);
+
+        return $rank !== null ? $rank + 1 : null;
     }
 }

@@ -13,11 +13,18 @@ return [
     |
     */
 
-    'default' => 'openai',
+    'agent_provider' => env('AI_AGENT_PROVIDER', 'anthropic'),
+    'agent_model'    => env('AI_AGENT_MODEL', null),
+    'agent_temperature' => (float) env('AI_AGENT_TEMPERATURE', 0.3),
+    'agent_max_tokens'  => (int)   env('AI_AGENT_MAX_TOKENS', 900),
+    'compressor_provider' => env('AI_COMPRESSOR_PROVIDER', 'anthropic'),
+    'compressor_model'    => env('AI_COMPRESSOR_MODEL', null),
+
+    'default' => env('AI_DRIVER', 'openai'),
     'default_for_images' => 'gemini',
     'default_for_audio' => 'openai',
     'default_for_transcription' => 'openai',
-    'default_for_embeddings' => 'openai',
+    'default_for_embeddings' => env('AI_EMBEDDING_DRIVER', 'openai'),
     'default_for_reranking' => 'cohere',
 
     /*
@@ -116,6 +123,15 @@ return [
             'driver' => 'ollama',
             'key' => env('OLLAMA_API_KEY', ''),
             'url' => env('OLLAMA_URL', 'http://localhost:11434'),
+            'models' => [
+                'text' => [
+                    'default' => env('AI_AGENT_MODEL', 'mistral:7b'),
+                ],
+                'embeddings' => [
+                    'default' => env('OLLAMA_EMBEDDING_MODEL', 'nomic-embed-text'),
+                    'dimensions' => (int) env('OLLAMA_EMBEDDING_DIMS', 768),
+                ],
+            ],
         ],
 
         'openai' => [

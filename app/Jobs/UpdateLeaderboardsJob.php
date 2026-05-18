@@ -21,7 +21,10 @@ class UpdateLeaderboardsJob implements ShouldQueue
         $match = GameMatch::with('players')->findOrFail($this->matchId);
 
         foreach ($match->players as $player) {
-            $leaderboard->record($player);
+            $leaderboard->record($player, $match->game, 'kda', (float) $player->kda);
+            $leaderboard->record($player, $match->game, 'frags', (float) $player->kills);
+            $leaderboard->record($player, $match->game, 'adr', (float) $player->adr);
+            $leaderboard->record($player, $match->game, 'clutches_won', (float) $player->clutches_won);
         }
     }
 }
