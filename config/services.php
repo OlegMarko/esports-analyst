@@ -36,8 +36,10 @@ return [
     ],
 
     'faceit' => [
-        'key' => env('FACEIT_API_KEY'),
+        'key'      => env('FACEIT_API_KEY'),
         'base_url' => 'https://open.faceit.com/data/v4',
+        'hub_ids'  => env('FACEIT_HUB_IDS', ''),
+        'app_id'   => env('FACEIT_APP_ID'),
     ],
 
 ];

@@ -21,6 +21,7 @@ class TrackedPlayer extends Model
         'elo',
         'active',
         'last_polled_at',
+        'performance_brief',
     ];
 
     protected function casts(): array

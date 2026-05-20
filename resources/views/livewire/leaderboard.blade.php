@@ -1,51 +1,3 @@
-<?php
-
-use App\Models\TrackedPlayer;
-use App\Services\LeaderboardService;
-use Livewire\Attributes\Computed;
-use Livewire\Component;
-
-new class extends Component
-{
-    public string $game = 'cs2';
-    public string $metric = 'kda';
-
-    #[Computed]
-    public function entries(): array
-    {
-        $raw = app(LeaderboardService::class)->top($this->game, $this->metric, 25);
-
-        if (empty($raw)) {
-            return [];
-        }
-
-        $nicknames = TrackedPlayer::whereIn('faceit_id', array_keys($raw))
-            ->pluck('faceit_nickname', 'faceit_id')
-            ->toArray();
-
-        return collect($raw)
-            ->map(fn ($score, $id) => [
-                'id' => $id,
-                'name' => $nicknames[$id] ?? $id,
-                'score' => (float) $score,
-            ])
-            ->values()
-            ->toArray();
-    }
-
-    public function metricLabel(): string
-    {
-        return match ($this->metric) {
-            'kda' => 'KDA',
-            'frags' => 'Kills',
-            'adr' => 'ADR',
-            'clutches_won' => 'Clutches',
-            default => strtoupper($this->metric),
-        };
-    }
-};
-?>
-
 <div>
     <flux:heading size="xl" class="mb-6">Leaderboards</flux:heading>
 
@@ -77,7 +29,7 @@ new class extends Component
             </flux:table.columns>
             <flux:table.rows>
                 @foreach($this->entries as $entry)
-                    <flux:table.row :key="$entry['id']">
+                    <flux:table.row :key="$entry['name']">
                         <flux:table.cell>
                             @if($loop->index < 3)
                                 <span>{{ ['🥇', '🥈', '🥉'][$loop->index] }}</span>
@@ -85,7 +37,11 @@ new class extends Component
                                 <span class="text-zinc-400">{{ $loop->iteration }}</span>
                             @endif
                         </flux:table.cell>
-                        <flux:table.cell variant="strong">{{ $entry['name'] }}</flux:table.cell>
+                        <flux:table.cell variant="strong">
+                            <a href="{{ route('player.show', $entry['name']) }}" wire:navigate class="hover:underline">
+                                {{ $entry['name'] }}
+                            </a>
+                        </flux:table.cell>
                         <flux:table.cell>{{ number_format($entry['score'], 2) }}</flux:table.cell>
                     </flux:table.row>
                 @endforeach

@@ -21,6 +21,9 @@
                     <flux:sidebar.item icon="trophy" :href="route('leaderboard')" :current="request()->routeIs('leaderboard')" wire:navigate>
                         {{ __('Leaderboard') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="signal" :href="route('live')" :current="request()->routeIs('live')" wire:navigate>
+                        {{ __('Live') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

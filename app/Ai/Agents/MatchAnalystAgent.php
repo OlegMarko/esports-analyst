@@ -19,6 +19,11 @@ class MatchAnalystAgent implements Agent, Conversational, HasStructuredOutput, H
         private string $game = 'cs2',
     ) {}
 
+    public static function forCurrentEnv(string $game): static
+    {
+        return new static($game);
+    }
+
     public function provider(): string
     {
         return (string) config('ai.agent_provider', 'ollama');
@@ -31,7 +36,7 @@ class MatchAnalystAgent implements Agent, Conversational, HasStructuredOutput, H
 
     public function maxTokens(): int
     {
-        return (int) config('ai.agent_max_tokens', 900);
+        return (int) config('ai.agent_max_tokens', 2000);
     }
 
     public function instructions(): string
@@ -41,7 +46,15 @@ class MatchAnalystAgent implements Agent, Conversational, HasStructuredOutput, H
             . 'stats (KDA, ADR, HS%, clutches), map scores, and half-time splits. '
             . 'Always be specific — cite player nicknames, exact scores, and stat numbers. '
             . 'Use the similarity search tool to find historical matches with similar '
-            . 'patterns before making conclusions. Keep analysis sharp and concise.';
+            . 'patterns before making conclusions.' . "\n\n"
+            . 'Output field rules:' . "\n"
+            . '- headline: one punchy sentence (max 12 words) capturing the single most decisive moment or standout stat.' . "\n"
+            . '- summary: 3-4 sentences. Cover (1) how the match unfolded across both halves, (2) which players had the biggest impact and why (cite their KDA/ADR), (3) the decisive turning point. Never write "null" or leave this empty.' . "\n"
+            . '- key_moments: 3-5 specific round events, e.g. "Half 1 ended 9-3 as gynkiN dropped 8 kills on a single T-side push". Avoid generic statements like "X had clutches".' . "\n"
+            . '- mvp: the single best-performing player nickname, based on KDA, ADR, and impact — not just kills.' . "\n"
+            . '- economy_rating: 1-10 score for how well teams managed money (force buys, eco rounds, utility usage).' . "\n"
+            . '- mechanical_rating: 1-10 score for the overall aim and mechanical skill on display.' . "\n"
+            . '- score: 1-10 overall match quality (competitiveness, momentum swings, entertainment value).';
     }
 
     public function messages(): iterable
@@ -60,6 +73,7 @@ class MatchAnalystAgent implements Agent, Conversational, HasStructuredOutput, H
     public function schema(JsonSchema $schema): array
     {
         return [
+            'headline' => $schema->string()->required(),
             'summary' => $schema->string()->required(),
             'key_moments' => $schema->array()->items($schema->string())->required(),
             'mvp' => $schema->string()->required(),

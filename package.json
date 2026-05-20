@@ -3,8 +3,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
-        "dev": "vite"
+        "build": "NODE_OPTIONS=--no-deprecation vite build",
+        "dev": "NODE_OPTIONS=--no-deprecation vite"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.11",

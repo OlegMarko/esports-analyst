@@ -1,58 +1,3 @@
-<?php
-
-use App\Exceptions\NotFoundException;
-use App\Models\TrackedPlayer;
-use App\Services\FaceitService;
-use Flux\Flux;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\Validate;
-use Livewire\Component;
-
-new class extends Component
-{
-    #[Validate('required|string|max:64')]
-    public string $nickname = '';
-
-    #[Computed]
-    public function players(): \Illuminate\Database\Eloquent\Collection
-    {
-        return TrackedPlayer::orderByDesc('elo')->get();
-    }
-
-    public function addPlayer(): void
-    {
-        $this->validate();
-
-        try {
-            $data = app(FaceitService::class)->playerByNickname($this->nickname);
-        } catch (NotFoundException) {
-            $this->addError('nickname', 'Player not found on Faceit.');
-            return;
-        }
-
-        TrackedPlayer::firstOrCreate(
-            ['faceit_id' => $data['player_id']],
-            [
-                'faceit_nickname' => $data['nickname'],
-                'steam_id' => $data['steam_id_64'] ?? null,
-                'avatar' => $data['avatar'] ?? null,
-                'faceit_level' => $data['games']['cs2']['skill_level'] ?? 1,
-                'elo' => $data['games']['cs2']['faceit_elo'] ?? 1000,
-            ]
-        );
-
-        $this->nickname = '';
-        Flux::toast("{$data['nickname']} is now being tracked.");
-    }
-
-    public function removePlayer(int $id): void
-    {
-        TrackedPlayer::findOrFail($id)->delete();
-        Flux::toast('Player removed.');
-    }
-};
-?>
-
 <div>
     <flux:heading size="xl" class="mb-6">Tracked Players</flux:heading>
 
@@ -65,6 +10,9 @@ new class extends Component
                     :invalid="$errors->has('nickname')"
                 />
                 <flux:error name="nickname" class="mt-1" />
+                @if($error)
+                    <p class="text-sm text-red-600 mt-1">{{ $error }}</p>
+                @endif
             </div>
             <flux:button type="submit" variant="primary">Track</flux:button>
         </form>
@@ -95,7 +43,9 @@ new class extends Component
                                     {{ strtoupper(substr($player->faceit_nickname, 0, 2)) }}
                                 </div>
                             @endif
-                            <span>{{ $player->faceit_nickname }}</span>
+                            <a href="{{ route('player.show', $player->faceit_nickname) }}" wire:navigate class="hover:underline">
+                                {{ $player->faceit_nickname }}
+                            </a>
                         </div>
                     </flux:table.cell>
                     <flux:table.cell>

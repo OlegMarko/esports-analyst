@@ -30,7 +30,14 @@ class GameMatch extends Model
         'eco_round_count',
         'first_half_score',
         'second_half_score',
+        'headline',
         'ai_summary',
+        'key_moments',
+        'mvp',
+        'economy_rating',
+        'mechanical_rating',
+        'match_score',
+        'similar_match_ids',
         'summary_at',
         'raw_faceit_payload',
     ];
@@ -38,9 +45,11 @@ class GameMatch extends Model
     protected function casts(): array
     {
         return [
-            'playstyle_tags' => 'array',
+            'playstyle_tags'    => 'array',
+            'key_moments'       => 'array',
+            'similar_match_ids' => 'array',
             'raw_faceit_payload' => 'array',
-            'played_at' => 'datetime',
+            'played_at'  => 'datetime',
             'summary_at' => 'datetime',
         ];
     }

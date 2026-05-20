@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+require __DIR__ . '/Fixtures/FaceitFixtures.php';
+
 /*
 |--------------------------------------------------------------------------
 | Test Case

@@ -1,32 +1,3 @@
-<?php
-
-use App\Models\GameMatch;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
-use Livewire\Component;
-
-new class extends Component
-{
-    public ?int $matchId = null;
-
-    #[Computed]
-    public function match(): ?GameMatch
-    {
-        if (! $this->matchId) {
-            return null;
-        }
-
-        return GameMatch::with('players')->find($this->matchId);
-    }
-
-    #[On('match-selected')]
-    public function loadMatch(int $matchId): void
-    {
-        $this->matchId = $matchId;
-    }
-};
-?>
-
 <div>
     @if(! $this->match)
         <div class="flex flex-col items-center justify-center h-64 text-zinc-500 gap-3">
@@ -87,19 +58,19 @@ new class extends Component
         </div>
 
         {{-- AI Analysis panel — polls until summary is available --}}
-        <div @unless($match->ai_summary) wire:poll.5000ms @endunless>
+        <div @unless($analysisReady) wire:poll.5000ms="checkAnalysis" @endunless>
             <flux:card>
                 <div class="flex items-center gap-2 mb-4">
                     <flux:icon.sparkles class="text-yellow-500 size-5" />
                     <flux:heading>AI Analysis</flux:heading>
                 </div>
 
-                @if($match->ai_summary)
+                @if($analysisReady)
                     <flux:text class="whitespace-pre-line leading-relaxed">{{ $match->ai_summary }}</flux:text>
                 @else
                     <div class="flex items-center gap-3 text-zinc-500 py-4">
                         <flux:icon.arrow-path class="size-5 animate-spin" />
-                        <span>Generating analysis… this may take a minute.</span>
+                        <span>Generating AI analysis — this may take a minute.</span>
                     </div>
                 @endif
             </flux:card>

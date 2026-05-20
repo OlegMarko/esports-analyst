@@ -72,6 +72,19 @@ class FaceitService
         return $response->json('rounds.0', []);
     }
 
+    public function hubMatches(string $hubId, int $limit = 10): array
+    {
+        $response = $this->http->get("/hubs/{$hubId}/matches", [
+            'type'   => 'ongoing',
+            'limit'  => $limit,
+            'offset' => 0,
+        ]);
+
+        $this->guard($response);
+
+        return $response->json('items', []);
+    }
+
     public function matchDetails(string $matchId): array
     {
         $response = $this->http->get("/matches/{$matchId}");

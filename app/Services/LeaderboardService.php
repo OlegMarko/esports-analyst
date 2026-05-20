@@ -16,7 +16,7 @@ class LeaderboardService
     {
         $key = "{$this->prefix}:{$game}:{$metric}";
 
-        Redis::zadd($key, $value, $player->faceit_player_id);
+        Redis::zadd($key, $value, $player->faceit_nickname);
         Redis::expire($key, $this->ttl);
     }
 
@@ -27,13 +27,13 @@ class LeaderboardService
         return Cache::remember(
             "lb_top:{$game}:{$metric}:{$limit}",
             300,
-            fn () => Redis::zrevrange($key, 0, $limit - 1, 'WITHSCORES'),
+            fn () => Redis::zrevrange($key, 0, $limit - 1, true),
         );
     }
 
-    public function playerRank(string $faceitPlayerId, string $game, string $metric): ?int
+    public function playerRank(string $nickname, string $game, string $metric): ?int
     {
-        $rank = Redis::zrevrank("{$this->prefix}:{$game}:{$metric}", $faceitPlayerId);
+        $rank = Redis::zrevrank("{$this->prefix}:{$game}:{$metric}", $nickname);
 
         return $rank !== null ? $rank + 1 : null;
     }
